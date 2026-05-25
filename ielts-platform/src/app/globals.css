@@ -1,0 +1,79 @@
+@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
+@theme {
+  --color-brand-navy-50: #f0f4f8;
+  --color-brand-navy-100: #d9e2ec;
+  --color-brand-navy-200: #bcccdc;
+  --color-brand-navy-300: #9fb3c8;
+  --color-brand-navy-400: #829ab1;
+  --color-brand-navy-500: #627d98;
+  --color-brand-navy-600: #486581;
+  --color-brand-navy-700: #334e68;
+  --color-brand-navy-800: #243b53;
+  --color-brand-navy-900: #102a43;
+  --color-brand-navy-950: #0a1929;
+
+  --color-brand-red-50: #fff5f5;
+  --color-brand-red-100: #fed7d7;
+  --color-brand-red-200: #feb2b2;
+  --color-brand-red-300: #fc8181;
+  --color-brand-red-400: #f56565;
+  --color-brand-red-500: #e53e3e;
+  --color-brand-red-600: #c53030;
+  --color-brand-red-700: #9b2c2c;
+  --color-brand-red-800: #822727;
+  --color-brand-red-900: #63171b;
+
+  --color-success-50: #f0fdf4;
+  --color-success-500: #22c55e;
+  --color-success-600: #16a34a;
+
+  --color-warning-50: #fffbeb;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+
+  --color-info-50: #eff6ff;
+  --color-info-500: #3b82f6;
+  --color-info-600: #2563eb;
+
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-card-hover: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-exam: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+  --shadow-modal: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+
+  --animate-fade-in: fade-in 0.3s ease-in-out;
+  --animate-slide-up: slide-up 0.3s ease-out;
+  --animate-slide-down: slide-down 0.3s ease-out;
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slide-up {
+    from { transform: translateY(10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes slide-down {
+    from { transform: translateY(-10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
