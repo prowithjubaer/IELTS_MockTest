@@ -45,12 +45,13 @@ export function DashboardSidebar() {
       case "super_admin":
         return [
           { href: "/admin", label: "Dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
-          { href: "/admin/users", label: "Users", icon: <Users className="w-5 h-5" /> },
-          { href: "/admin/tests", label: "All Tests", icon: <FileText className="w-5 h-5" /> },
+          { href: "/admin/full-mock-tests", label: "Full Mock Tests", icon: <Trophy className="w-5 h-5" /> },
           { href: "/admin/listening-tests", label: "Listening", icon: <Headphones className="w-5 h-5" /> },
           { href: "/admin/reading-tests", label: "Reading", icon: <BookOpen className="w-5 h-5" /> },
           { href: "/admin/writing-tests", label: "Writing", icon: <Pencil className="w-5 h-5" /> },
           { href: "/admin/speaking-tests", label: "Speaking", icon: <Mic className="w-5 h-5" /> },
+          { href: "/admin/users", label: "Users", icon: <Users className="w-5 h-5" /> },
+          { href: "/admin/tests", label: "All Tests", icon: <FileText className="w-5 h-5" /> },
           { href: "/admin/feedback", label: "Feedback", icon: <MessageSquare className="w-5 h-5" />, badge: 5 },
           { href: "/admin/results", label: "Results", icon: <ClipboardCheck className="w-5 h-5" /> },
           { href: "/admin/analytics", label: "Analytics", icon: <BarChart3 className="w-5 h-5" /> },
@@ -59,15 +60,15 @@ export function DashboardSidebar() {
       case "teacher":
         return [
           { href: "/teacher", label: "Dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
-          { href: "/teacher/submissions", label: "Submissions", icon: <FileText className="w-5 h-5" />, badge: 3 },
-          { href: "/teacher/marking", label: "Marking", icon: <ClipboardCheck className="w-5 h-5" /> },
-          { href: "/teacher/feedback", label: "Feedback", icon: <MessageSquare className="w-5 h-5" /> },
+          { href: "/teacher/writing", label: "Writing Reviews", icon: <Pencil className="w-5 h-5" />, badge: 3 },
+          { href: "/teacher/speaking", label: "Speaking Reviews", icon: <Mic className="w-5 h-5" />, badge: 2 },
+          { href: "/teacher/feedback", label: "Published", icon: <MessageSquare className="w-5 h-5" /> },
         ];
       default:
         return [
           { href: "/student", label: "Dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
-          { href: "/student/tests", label: "My Tests", icon: <FileText className="w-5 h-5" /> },
-          { href: "/student/results", label: "Results", icon: <Trophy className="w-5 h-5" /> },
+          { href: "/tests", label: "Mock Tests", icon: <Trophy className="w-5 h-5" /> },
+          { href: "/student/results", label: "Results", icon: <ClipboardCheck className="w-5 h-5" /> },
           { href: "/student/profile", label: "Profile", icon: <User className="w-5 h-5" /> },
         ];
     }
