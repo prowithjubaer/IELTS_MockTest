@@ -1,8 +1,42 @@
+// Re-export all database types
+export type {
+  Database,
+  UserRole,
+  TestModule,
+  TestDifficulty,
+  TestStatus,
+  TestAccess,
+  AttemptStatus,
+  InputType,
+  ScoredBy,
+  FeedbackStatus,
+  UploadStatus,
+  NotificationType,
+  QuestionOption,
+  ProfileRow,
+  TestRow,
+  TestInsert,
+  TestUpdate,
+  TestWithModule,
+  AttemptRow,
+  AttemptInsert,
+  AttemptUpdate,
+  AttemptWithScore,
+  ScoreRow,
+  RubricScoreRow,
+  TeacherFeedbackRow,
+  FullMockAttemptRow,
+  FullMockAttemptWithDetails,
+  AdminDashboardStats,
+  StudentDashboardStats,
+  TeacherDashboardStats,
+} from './database';
+
 // ==========================================
-// USER & AUTH TYPES
+// LEGACY TYPES (kept for backward compat)
 // ==========================================
 
-export type UserRole = "guest" | "student" | "teacher" | "admin" | "super_admin";
+// UserRole re-exported from database.ts above
 
 export interface User {
   id: string;
@@ -38,13 +72,8 @@ export interface TeacherProfile {
 }
 
 // ==========================================
-// TEST & MODULE TYPES
+// TEST & MODULE TYPES (using re-exported from database.ts)
 // ==========================================
-
-export type TestModule = "listening" | "reading" | "writing" | "speaking" | "full";
-export type TestDifficulty = "easy" | "medium" | "hard";
-export type TestStatus = "draft" | "published" | "archived";
-export type TestAccess = "free" | "paid";
 
 export interface Test {
   id: string;

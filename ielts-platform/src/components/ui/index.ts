@@ -7,3 +7,4 @@ export { Tabs } from "./Tabs";
 export { Progress, CircularProgress } from "./Progress";
 export { Skeleton, CardSkeleton, TableSkeleton, DashboardSkeleton, ExamSkeleton } from "./LoadingSkeleton";
 export { Timer } from "./Timer";
+export { ToastProvider, useToast } from "./Toast";

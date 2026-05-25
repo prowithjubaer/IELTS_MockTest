@@ -6,21 +6,24 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { Button, Input } from "@/components/ui";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { getAppMode } from "@/lib/supabase/config";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isLoading } = useAuthStore();
+  const { login, isLoading, error, clearError } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [localError, setLocalError] = useState("");
+  const appMode = getAppMode();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setLocalError("");
+    clearError();
 
     if (!email || !password) {
-      setError("Please fill in all fields");
+      setLocalError("Please fill in all fields");
       return;
     }
 
@@ -36,9 +39,11 @@ export default function LoginPage() {
         router.push("/student");
       }
     } catch {
-      setError("Invalid email or password");
+      setLocalError(error || "Invalid email or password");
     }
   };
+
+  const displayError = localError || error;
 
   return (
     <div className="min-h-screen flex">
@@ -54,28 +59,21 @@ export default function LoginPage() {
               <span className="font-display font-bold text-brand-red-400 text-2xl ml-1">BD</span>
             </div>
           </div>
-          <h1 className="text-3xl font-display font-bold mb-4">
-            Welcome Back!
-          </h1>
+          <h1 className="text-3xl font-display font-bold mb-4">Welcome Back!</h1>
           <p className="text-gray-300 text-lg leading-relaxed">
             Continue your IELTS preparation journey. Practice mock tests, review your scores, and achieve your target band.
           </p>
           <div className="mt-12 space-y-4">
-            <div className="flex items-center gap-3 text-gray-300">
-              <div className="w-8 h-8 bg-brand-navy-700 rounded-full flex items-center justify-center">✓</div>
-              <span>Real IELTS exam simulation</span>
-            </div>
-            <div className="flex items-center gap-3 text-gray-300">
-              <div className="w-8 h-8 bg-brand-navy-700 rounded-full flex items-center justify-center">✓</div>
-              <span>Expert feedback on Writing & Speaking</span>
-            </div>
-            <div className="flex items-center gap-3 text-gray-300">
-              <div className="w-8 h-8 bg-brand-navy-700 rounded-full flex items-center justify-center">✓</div>
-              <span>Track your progress with analytics</span>
-            </div>
+            {["Real IELTS exam simulation", "Expert feedback on Writing & Speaking", "Track your progress with analytics"].map((text) => (
+              <div key={text} className="flex items-center gap-3 text-gray-300">
+                <div className="w-8 h-8 bg-brand-navy-700 rounded-full flex items-center justify-center text-sm">✓</div>
+                <span>{text}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
+
 
       {/* Right Side - Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
@@ -87,12 +85,19 @@ export default function LoginPage() {
             <span className="font-display font-bold text-brand-navy-900 text-xl">Pro English BD</span>
           </div>
 
+          {/* Mode indicator */}
+          {appMode === "demo" && (
+            <div className="mb-4 p-2 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700 text-center">
+              Running in <strong>Demo Mode</strong> — No real authentication required
+            </div>
+          )}
+
           <h2 className="text-2xl font-display font-bold text-gray-900 mb-2">Sign In</h2>
           <p className="text-gray-500 mb-8">Enter your credentials to access your account</p>
 
-          {error && (
+          {displayError && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-              {error}
+              {displayError}
             </div>
           )}
 
@@ -146,7 +151,9 @@ export default function LoginPage() {
               <p><strong>Admin:</strong> admin@proenglishbd.com</p>
               <p><strong>Teacher:</strong> teacher@proenglishbd.com</p>
               <p><strong>Student:</strong> student@proenglishbd.com</p>
-              <p className="text-gray-400 mt-1">Password: any (demo mode)</p>
+              <p className="text-gray-400 mt-1">
+                {appMode === "demo" ? "Password: any (demo mode)" : "Use registered passwords"}
+              </p>
             </div>
           </div>
 

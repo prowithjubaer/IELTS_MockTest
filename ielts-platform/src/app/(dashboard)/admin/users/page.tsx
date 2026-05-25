@@ -1,118 +1,132 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { DashboardLayout } from "@/components/layout";
-import { Card, Badge, Button } from "@/components/ui";
-import { Plus, Search, Eye, Edit, Ban, UserCheck, MoreVertical } from "lucide-react";
+import { Card, Badge, Button, Tabs, Skeleton } from "@/components/ui";
+import { dashboardService } from "@/lib/services";
+import type { ProfileRow } from "@/types/database";
+import { Search, Users, Shield, GraduationCap, BookOpen } from "lucide-react";
 
 export default function AdminUsersPage() {
-  const users = [
-    { id: "1", name: "Jubayer Ahmed", email: "jubayer@email.com", role: "student", status: "active", tests: 12, joined: "Jan 5, 2024" },
-    { id: "2", name: "Sarah Johnson", email: "sarah@email.com", role: "teacher", status: "active", tests: 0, joined: "Dec 20, 2023" },
-    { id: "3", name: "Rahim Uddin", email: "rahim@email.com", role: "student", status: "active", tests: 8, joined: "Jan 2, 2024" },
-    { id: "4", name: "Fatima Akter", email: "fatima@email.com", role: "student", status: "blocked", tests: 3, joined: "Dec 28, 2023" },
-    { id: "5", name: "Kabir Hossain", email: "kabir@email.com", role: "student", status: "active", tests: 15, joined: "Nov 15, 2023" },
-    { id: "6", name: "Dr. Rahman", email: "rahman@email.com", role: "teacher", status: "active", tests: 0, joined: "Oct 1, 2023" },
+  const [activeTab, setActiveTab] = useState("all");
+  const [users, setUsers] = useState<ProfileRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
+    const roleFilter = activeTab === "all" ? undefined : activeTab;
+    const result = await dashboardService.listUsers({
+      role: roleFilter,
+      search: searchQuery || undefined,
+    });
+    if (result.success && result.data) {
+      setUsers(result.data);
+    }
+    setLoading(false);
+  }, [activeTab, searchQuery]);
+
+  useEffect(() => { fetchUsers(); }, [fetchUsers]);
+
+  const tabs = [
+    { id: "all", label: "All Users" },
+    { id: "student", label: "Students" },
+    { id: "teacher", label: "Teachers" },
+    { id: "admin", label: "Admins" },
   ];
 
+  const roleIcons: Record<string, React.ReactNode> = {
+    student: <GraduationCap className="w-4 h-4 text-blue-600" />,
+    teacher: <BookOpen className="w-4 h-4 text-green-600" />,
+    admin: <Shield className="w-4 h-4 text-purple-600" />,
+    super_admin: <Shield className="w-4 h-4 text-red-600" />,
+  };
+
+  const roleColors: Record<string, string> = {
+    student: "info",
+    teacher: "success",
+    admin: "warning",
+    super_admin: "paid",
+  };
+
   return (
-    <DashboardLayout title="User Management" subtitle="Manage all registered users, roles, and access.">
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <Card className="p-4">
-          <p className="text-sm text-gray-500">Total Users</p>
-          <p className="text-2xl font-bold text-gray-900">5,234</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-sm text-gray-500">Students</p>
-          <p className="text-2xl font-bold text-blue-600">5,218</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-sm text-gray-500">Teachers</p>
-          <p className="text-2xl font-bold text-green-600">14</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-sm text-gray-500">Blocked</p>
-          <p className="text-2xl font-bold text-red-600">2</p>
-        </Card>
+    <DashboardLayout title="User Management" subtitle="Manage students, teachers, and administrators.">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} variant="default" />
       </div>
 
-      {/* Search */}
       <Card className="p-4 mb-6">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search by name or email..."
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy-200"
-            />
-          </div>
-          <select className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white">
-            <option>All Roles</option>
-            <option>Student</option>
-            <option>Teacher</option>
-            <option>Admin</option>
-          </select>
-          <Button variant="primary" leftIcon={<Plus className="w-4 h-4" />}>
-            Add User
-          </Button>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search by name or email..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy-200"
+          />
         </div>
       </Card>
 
-      {/* Users Table */}
-      <Card padding="none" className="overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tests</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Joined</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {users.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-brand-navy-100 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-brand-navy-900">{user.name.charAt(0)}</span>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                        <p className="text-xs text-gray-500">{user.email}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <Badge variant={user.role === "teacher" ? "info" : "default"} className="capitalize">
-                      {user.role}
-                    </Badge>
-                  </td>
-                  <td className="px-6 py-4">
-                    <Badge variant={user.status === "active" ? "success" : "danger"}>
-                      {user.status}
-                    </Badge>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{user.tests}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{user.joined}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-1">
-                      <button className="p-1.5 rounded hover:bg-gray-200 text-gray-500"><Eye className="w-4 h-4" /></button>
-                      <button className="p-1.5 rounded hover:bg-gray-200 text-gray-500"><Edit className="w-4 h-4" /></button>
-                      <button className="p-1.5 rounded hover:bg-red-100 text-red-500"><Ban className="w-4 h-4" /></button>
-                    </div>
-                  </td>
+      {loading ? (
+        <Card className="p-6"><div className="space-y-4">{[1,2,3,4,5].map(i => <Skeleton key={i} className="h-12 w-full" />)}</div></Card>
+      ) : users.length === 0 ? (
+        <Card className="p-12 text-center">
+          <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-700">No users found</h3>
+        </Card>
+      ) : (
+        <Card padding="none" className="overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-100">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Joined</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {users.map((u) => (
+                  <tr key={u.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 bg-brand-navy-100 rounded-full flex items-center justify-center">
+                          <span className="text-sm font-bold text-brand-navy-700">{u.name.charAt(0).toUpperCase()}</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{u.name}</p>
+                          <p className="text-xs text-gray-500">{u.email}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-1.5">
+                        {roleIcons[u.role]}
+                        <Badge variant={(roleColors[u.role] || "default") as "info" | "success" | "warning" | "paid" | "default"}>
+                          {u.role.replace("_", " ")}
+                        </Badge>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Badge variant={u.is_active ? "success" : "default"}>
+                        {u.is_active ? "Active" : "Inactive"}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm text-gray-500">{new Date(u.created_at).toLocaleDateString()}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="px-6 py-4 border-t border-gray-100">
+            <p className="text-sm text-gray-500">Showing {users.length} users</p>
+          </div>
+        </Card>
+      )}
     </DashboardLayout>
   );
 }

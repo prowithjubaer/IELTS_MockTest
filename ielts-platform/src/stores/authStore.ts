@@ -1,49 +1,25 @@
+"use client";
+
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { User, UserRole } from "@/types";
+import { authService, type AuthUser } from "@/lib/services";
+import type { UserRole } from "@/types/database";
 
 interface AuthState {
-  user: User | null;
+  user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  setUser: (user: User | null) => void;
+  error: string | null;
+  setUser: (user: AuthUser | null) => void;
   setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string, role?: UserRole) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
   hasRole: (roles: UserRole[]) => boolean;
+  clearError: () => void;
 }
-
-// Demo users for development
-const demoUsers: Record<string, User> = {
-  "admin@proenglishbd.com": {
-    id: "admin-001",
-    email: "admin@proenglishbd.com",
-    name: "Admin User",
-    role: "admin",
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  "teacher@proenglishbd.com": {
-    id: "teacher-001",
-    email: "teacher@proenglishbd.com",
-    name: "Sarah Johnson",
-    role: "teacher",
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  "student@proenglishbd.com": {
-    id: "student-001",
-    email: "student@proenglishbd.com",
-    name: "Jubayer Ahmed",
-    role: "student",
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-};
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -51,53 +27,67 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isAuthenticated: false,
       isLoading: false,
+      error: null,
 
       setUser: (user) =>
-        set({ user, isAuthenticated: !!user }),
+        set({ user, isAuthenticated: !!user, error: null }),
 
       setLoading: (isLoading) => set({ isLoading }),
 
-      login: async (email: string, _password: string) => {
-        set({ isLoading: true });
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 800));
+      setError: (error) => set({ error, isLoading: false }),
 
-        const user = demoUsers[email];
-        if (user) {
-          set({ user, isAuthenticated: true, isLoading: false });
+      clearError: () => set({ error: null }),
+
+      login: async (email: string, password: string) => {
+        set({ isLoading: true, error: null });
+        const result = await authService.login(email, password);
+
+        if (result.success && result.data) {
+          set({
+            user: result.data,
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+          });
         } else {
-          // Create a student user for any other email
-          const newUser: User = {
-            id: `user-${Date.now()}`,
-            email,
-            name: email.split("@")[0],
-            role: "student",
-            is_active: true,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          };
-          set({ user: newUser, isAuthenticated: true, isLoading: false });
+          set({
+            isLoading: false,
+            error: result.error || "Login failed",
+          });
+          throw new Error(result.error || "Login failed");
         }
       },
 
-      register: async (name: string, email: string, _password: string, role?: UserRole) => {
-        set({ isLoading: true });
-        await new Promise((resolve) => setTimeout(resolve, 800));
+      register: async (name: string, email: string, password: string, role?: UserRole) => {
+        set({ isLoading: true, error: null });
+        const result = await authService.register(name, email, password, role || "student");
 
-        const newUser: User = {
-          id: `user-${Date.now()}`,
-          email,
-          name,
-          role: role || "student",
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-        set({ user: newUser, isAuthenticated: true, isLoading: false });
+        if (result.success && result.data) {
+          set({
+            user: result.data,
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+          });
+        } else {
+          set({
+            isLoading: false,
+            error: result.error || "Registration failed",
+          });
+          throw new Error(result.error || "Registration failed");
+        }
       },
 
-      logout: () => {
-        set({ user: null, isAuthenticated: false });
+      logout: async () => {
+        await authService.logout();
+        set({ user: null, isAuthenticated: false, error: null });
+      },
+
+      refreshUser: async () => {
+        const result = await authService.getCurrentUser();
+        if (result.success && result.data) {
+          set({ user: result.data, isAuthenticated: true });
+        }
       },
 
       hasRole: (roles: UserRole[]) => {
@@ -108,6 +98,10 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "auth-storage",
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+      }),
     }
   )
 );
